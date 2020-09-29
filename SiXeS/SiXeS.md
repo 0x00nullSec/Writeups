@@ -365,6 +365,7 @@ Let's start with downloading the binary for further analysis. Therefore we just 
 What we can do next is to analyze the binary with ghidra:
 
 main function:
+
 ![](attachments/Clipboard_20.png)
 * Takes care of using the SUID 
 * Prints the text banner
@@ -372,6 +373,7 @@ main function:
 * Prints closing text once function has been completed and closes the programm
 
 update_notes function:
+
 ![](attachments/Clipboard_21.png)
 * creates buffer for input (local_118 with 264 Bytes)
 * checks if output file exists and is writable (/home/webmaster/notes.txt)
@@ -487,6 +489,7 @@ Now if everything is prepared well, we can just execute our selfcrafted exploit 
 EPIC! :smile:
 
 Now we can easily grab the 5th flag:
+
 ![](attachments/Clipboard_25.png)
 
 Before we go on, now it's time to make our access more persistent. In case our connection should drop, we would need to go all the way back to the initial meterpreter shell, launch the ncat, launch the exploit, etc. 
