@@ -24,7 +24,7 @@ Download:  [here](https://www.vulnhub.com/entry/sixes-1,380/)
 First thing we do once the machine is up and running is to use nmap to scan for open ports
 
 One very nice thing is that it directly shows us the assigned IP address on boot, so we don't have to search for it :smile:
-![](https://raw.githubusercontent.com/0x00nullSec/writeups/master/SiXeS//Clipboard_01.png)
+![](attachments/Clipboard_01.png)
 
 ~~~
 ┌──(root💀kali-VM)-[~/SiXeS]
@@ -32,7 +32,7 @@ One very nice thing is that it directly shows us the assigned IP address on boot
 ~~~
 
 Result:
-![](https://raw.githubusercontent.com/0x00nullSec/writeups/master/SiXeS//Clipboard_02.png)
+![](attachments/Clipboard_02.png)
 
 This reveals 3 open ports: 
 * 21/tcp FTP
@@ -45,7 +45,7 @@ nmap directly detects that anoymous login to FTP is possible and there is a file
 
 We connect to the ftp with the anonymous account (password can be empty or anything), download the file and it contains the first flag.
 
-![](https://raw.githubusercontent.com/0x00nullSec/writeups/master/SiXeS//Clipboard_03.png)
+![](attachments/Clipboard_03.png)
 
 The 2Do-list inside the files gives some indication that the admin of the page is not completly finished with the setup yet. However he already did spend some thoughts about security and implemented "a firewall to block malicious tools". This might point to tools like dirb and sqlmap. We will probably have to deal with that in the next steps. However the remark that he probably also thinks about hiring a Pentester to check the page shows that he himself has some doubts if security level is sufficient - good for us!
 
@@ -53,7 +53,7 @@ The 2Do-list inside the files gives some indication that the admin of the page i
 
 Now we have a detailed look at the webpage: On first glance it appears to be a typical esports Team Fortress 2 clan webpage.
 
-![](https://raw.githubusercontent.com/0x00nullSec/writeups/master/SiXeS//Clipboard_04.png)
+![](attachments/Clipboard_04.png)
 
 There is some basic CMS with articles / blog entries, plus some interesting sections like "contact" and especially the "Restricted Area" catches our attention.  
 
@@ -61,7 +61,7 @@ Also there is functionality which is not working (yet?), e.g. the Search box or 
 
 Analysis of HTML sourcecode does not reveal anything interesting. So we try to identify weeknesses like LFI in $_GET variable "page": 
 
-![](https://raw.githubusercontent.com/0x00nullSec/writeups/master/SiXeS//Clipboard_05.png)
+![](attachments/Clipboard_05.png)
 
 Unfortunately no success :cry:
 
@@ -75,7 +75,7 @@ This indicates that there is a database involved where articles are saved and ha
 
 Normally the first idea would be to use sqlmap for automated checking of the parameters in the URL for exploitable vulnerabilities. But by doing so, now we see what the owner probably meant with the note regarding the firewall: there seems to be some kind of mechanism which tries to prevents us from using such script-kiddy tools (same effect also for dirb when trying to enumerate the webserver).
 
-![](https://raw.githubusercontent.com/0x00nullSec/writeups/master/SiXeS//Clipboard_06.png)
+![](attachments/Clipboard_06.png)
 
 So we have to go in manually ...
 
@@ -140,7 +140,7 @@ http://10.0.2.5/?page=post.php&id=1 union select null,flag,null from sixes.s3cr3
 http://10.0.2.5/?page=post.php&id=1 union select null,flag,null from sixes.s3cr3t_t4ble_31337 limit 1,1     => displays "shellmates{69f78fa6e9f49d180d145553ceecf87d}"
 ~~~
 
-![](https://raw.githubusercontent.com/0x00nullSec/writeups/master/SiXeS//Clipboard_07.png)
+![](attachments/Clipboard_07.png)
 
 Digging further into the DB with the same method, we also find a users table with one single entry
 
@@ -153,11 +153,11 @@ These might be the credentials required for logging in to the "Restricted area" 
 ## Flag 3: XSS cookie stealing
 Let's again focus on the webpage. We need to find a way to access the restricted area. We know that the username probably is "webmaster", but are stuck on the pw.
 
-![](https://raw.githubusercontent.com/0x00nullSec/writeups/master/SiXeS//Clipboard_08.png)
+![](attachments/Clipboard_08.png)
 
 So let's have a look at the "Contact" page where we can fill a feedback formular and send it to the webmaster. 
 
-![](https://raw.githubusercontent.com/0x00nullSec/writeups/master/SiXeS//Clipboard_09.png)
+![](attachments/Clipboard_09.png)
 
 Let's imagine: 
 Someone should receive and read what we're sending here?
@@ -176,16 +176,16 @@ Then we hit "Send message" and wait for the webmaster to pick up our message.
 
 And eventually the webmaster will click our link, connect to us and spoil his admin session ID.
 
-![](https://raw.githubusercontent.com/0x00nullSec/writeups/master/SiXeS//Clipboard_11.png)
+![](attachments/Clipboard_11.png)
 
 Ok, that's probably not the most highly sophisticated  "XSS simulator", but anyway ...
 
 We go back to Firefox, open the Restricted Area page, hit F12 for the Firefox develper tools, click on Storage -> Cookies and exchange our PHPSESSID with the one we received in netcat, 
-![](https://raw.githubusercontent.com/0x00nullSec/writeups/master/SiXeS//Clipboard_2020-09-29-08-37-28.png)
+![](attachments/Clipboard_2020-09-29-08-37-28.png)
 
 Then we reload the page with F5 
 
-![](https://raw.githubusercontent.com/0x00nullSec/writeups/master/SiXeS//Clipboard_12.png)
+![](attachments/Clipboard_12.png)
 
 and are logged in to see flag number 3! 
 
@@ -205,7 +205,7 @@ So let's see what happens if we inject some php code into the EXIF fields of a j
 
 We upload the smiley1.php and are able to access it now in the /img/ subfolder of the page
 
-![](https://raw.githubusercontent.com/0x00nullSec/writeups/master/SiXeS//Clipboard_13.png)
+![](attachments/Clipboard_13.png)
 
 Very nice! We found a way to execute custom php code on the target machine! 
 
@@ -217,11 +217,11 @@ So let's not waste any further time and prepare something more usefull. First we
 
 For LHOST specify the local IP of your Kali Linux system (where the reverse connection should point to).
 
-![](https://raw.githubusercontent.com/0x00nullSec/writeups/master/SiXeS//Clipboard_14.png)
+![](attachments/Clipboard_14.png)
 
 Now edit meterpreter.php and insert `<?php` in the beginning and `?>` at the end of the file. The meterpreter.php should contain 1 line with content similar to this:
 
-![](https://raw.githubusercontent.com/0x00nullSec/writeups/master/SiXeS//Clipboard_15.png)
+![](attachments/Clipboard_15.png)
 
 If you're curious what's written there, you can try to base64 decode the string with [Cyberchef](https://gchq.github.io/CyberChef/) 
 
@@ -254,7 +254,7 @@ msf5 exploit(multi/handler) > run
 
 Once the "reverse TCP handler" has been started, access the uploaded smiley2.php in browser. 
 
-![](https://raw.githubusercontent.com/0x00nullSec/writeups/master/SiXeS//Clipboard_16.png)
+![](attachments/Clipboard_16.png)
 
 If you receive message above, you successfully spawned a reverse connection with meterpreter, which allows us to work very comfortably on the target
 
@@ -273,7 +273,7 @@ www-data essentially is a low privilege user which is intended to prevent anyone
 
 So we have to find a way to escalate into something more powerfull. From /etc/passwd we know that besides root, there is also a user "webmaster" existing on OS-level. In his $HOME we also found the low_user.txt file with flag number 4, so obviously we're on the right track here. 
 
-![](https://raw.githubusercontent.com/0x00nullSec/writeups/master/SiXeS//Clipboard_17.png)
+![](attachments/Clipboard_17.png)
 
 Unfortunately that's the only meaningfull readable file in there...
 
@@ -291,7 +291,7 @@ www-data@sixes:/home/webmaster$ find / -type f -perm -4000 -exec ls -al {} \; 2>
 -r-sr-sr-x 1 webmaster webmaster 17320 Oct  3  2019 /sbin/notemaker
 ~~~
 
-![](https://raw.githubusercontent.com/0x00nullSec/writeups/master/SiXeS//Clipboard_18.png)
+![](attachments/Clipboard_18.png)
 
 It's a custom binary (self coded?) which is executable by everyone, owned by webmaster and has SUID bit set. This means that this program inherits the privileges of webmaster during it's execution.
 
@@ -360,19 +360,19 @@ Since they differ in unforseen ways, we can't simply use static addresses in our
 
 Let's start with downloading the binary for further analysis. Therefore we just close the meterpreter shell mode with ctrl + c and execute the following commands:
 
-![](https://raw.githubusercontent.com/0x00nullSec/writeups/master/SiXeS//Clipboard_19.png)
+![](attachments/Clipboard_19.png)
 
 What we can do next is to analyze the binary with ghidra:
 
 main function:
-![](https://raw.githubusercontent.com/0x00nullSec/writeups/master/SiXeS//Clipboard_20.png)
+![](attachments/Clipboard_20.png)
 * Takes care of using the SUID 
 * Prints the text banner
 * hands over to update_notes() function
 * Prints closing text once function has been completed and closes the programm
 
 update_notes function:
-![](https://raw.githubusercontent.com/0x00nullSec/writeups/master/SiXeS//Clipboard_21.png)
+![](attachments/Clipboard_21.png)
 * creates buffer for input (local_118 with 264 Bytes)
 * checks if output file exists and is writable (/home/webmaster/notes.txt)
 * receives user input with vulnerable gets function and stores it to local_118 variable
@@ -469,7 +469,7 @@ ldd ncat
   ~~~
 
 So we also have to upload it. 
-![](https://raw.githubusercontent.com/0x00nullSec/writeups/master/SiXeS//Clipboard_22.png)
+![](attachments/Clipboard_22.png)
 
 Having that prepared, we can "remote enable" notemaker via ncat on port 9999 (which is also what our python exploit script will connect to).
 ~~~
@@ -477,17 +477,17 @@ www-data@sixes:/tmp$ LD_LIBRARY_PATH=. ./ncat -l 9999 --exec /sbin/notemaker
 ~~~
 The `LD_LIBRARY_PATH=.` is required that ncat can find the `liblua5.3.so.0` library in the /tmp/ directory.
 
-![](https://raw.githubusercontent.com/0x00nullSec/writeups/master/SiXeS//Clipboard_23.png)
+![](attachments/Clipboard_23.png)
 
 Now if everything is prepared well, we can just execute our selfcrafted exploit which will do all the magic for us and should provide us an escalated shell on SiXeS:
 
 
-![](https://raw.githubusercontent.com/0x00nullSec/writeups/master/SiXeS//Clipboard_24.png)
+![](attachments/Clipboard_24.png)
 
 EPIC! :smile:
 
 Now we can easily grab the 5th flag:
-![](https://raw.githubusercontent.com/0x00nullSec/writeups/master/SiXeS//Clipboard_25.png)
+![](attachments/Clipboard_25.png)
 
 Before we go on, now it's time to make our access more persistent. In case our connection should drop, we would need to go all the way back to the initial meterpreter shell, launch the ncat, launch the exploit, etc. 
 
@@ -531,7 +531,7 @@ $ chmod -R 700 .ssh
 ~~~
 
 Now we can easily ssh into the webmaster account:
-![](https://raw.githubusercontent.com/0x00nullSec/writeups/master/SiXeS//Clipboard_26.png)
+![](attachments/Clipboard_26.png)
 
 ## Flag 6: Systemctl
 
@@ -574,7 +574,7 @@ webmaster@sixes:~$ sudo /usr/sbin/service ../../bin/bash
 
 Now we have fully owned the machine and can grab the root flag!
 
-![](https://raw.githubusercontent.com/0x00nullSec/writeups/master/SiXeS//Clipboard_27.png)
+![](attachments/Clipboard_27.png)
 
 If you are interested in how the machine works "behind the curtains", check out the 2 other folders
 * in `firewall` you will find the answer why dirb and sqlmap is suffering heavily
