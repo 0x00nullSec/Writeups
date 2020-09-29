@@ -32,6 +32,7 @@ One very nice thing is that it directly shows us the assigned IP address on boot
 ~~~
 
 Result:
+
 ![](attachments/Clipboard_02.png)
 
 This reveals 3 open ports: 
@@ -181,6 +182,7 @@ And eventually the webmaster will click our link, connect to us and spoil his ad
 Ok, that's probably not the most highly sophisticated  "XSS simulator", but anyway ...
 
 We go back to Firefox, open the Restricted Area page, hit F12 for the Firefox develper tools, click on Storage -> Cookies and exchange our PHPSESSID with the one we received in netcat, 
+
 ![](attachments/Clipboard_2020-09-29-08-37-28.png)
 
 Then we reload the page with F5 
@@ -367,6 +369,7 @@ What we can do next is to analyze the binary with ghidra:
 main function:
 
 ![](attachments/Clipboard_20.png)
+
 * Takes care of using the SUID 
 * Prints the text banner
 * hands over to update_notes() function
@@ -375,6 +378,7 @@ main function:
 update_notes function:
 
 ![](attachments/Clipboard_21.png)
+
 * creates buffer for input (local_118 with 264 Bytes)
 * checks if output file exists and is writable (/home/webmaster/notes.txt)
 * receives user input with vulnerable gets function and stores it to local_118 variable
@@ -534,6 +538,7 @@ $ chmod -R 700 .ssh
 ~~~
 
 Now we can easily ssh into the webmaster account:
+
 ![](attachments/Clipboard_26.png)
 
 ## Flag 6: Systemctl
