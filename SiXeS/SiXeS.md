@@ -5,7 +5,7 @@
 * [Flag 2: SQL injection](#flag-2-sql-injection)
 * [Flag 3: XSS cookie stealing](#flag-3-xss-cookie-stealing)
 * [Flag 4: Initial low privilege system access](#flag-4-initial-low-privilege-system-access)
-* [Flag 5: Privilege escalation: SUID binary exploitation](#flag-5-privilege-escallation-suid-binary-exploitation)
+* [Flag 5: Privilege escalation: SUID binary exploitation](#flag-5-privilege-escalation-suid-binary-exploitation)
 * [Flag 6: Getting root](#flag-6-getting-root)
 * [Personal remarks](#personal-remarks)
 
