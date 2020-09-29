@@ -1,12 +1,13 @@
 # SiXeS
 
-* Overview
-* Flag 1: Anonymous FTP
-* Flag 2: SQL injection
-* Flag 3: XSS cookie stealing
-* Flag 4: Initial low privilege system access
-* Flag 5: Privilege escalation: SUID binary exploitation
-* Flag 6: Systemctl
+* [Overview](#overview)
+* [Flag 1: Anonymous FTP](#flag_1-_anonymous_ftp)
+* [Flag 2: SQL injection](#flag_2-_sql_injection)
+* [Flag 3: XSS cookie stealing](#flag_3-_xss_cookie_stealing)
+* [Flag 4: Initial low privilege system access](#flag_4-_initial_low_privilege_system_access)
+* [Flag 5: Privilege escalation: SUID binary exploitation](#flag_5-_privilege_escallation-_suid_binary_exploitation)
+* [Flag 6: Getting root](#flag_6-_getting_root)
+* [Personal remarks](#personal_remarks)
 
 ## Overview
 
@@ -548,7 +549,7 @@ Now we can easily ssh into the webmaster account:
 
 ![](attachments/Clipboard_26.png)
 
-## Flag 6: Systemctl
+## Flag 6: Getting root
 
 On to the last flag now! By checking webmasters files, we find out that the root user left him the following notes via his /sbin/notemaker setup:
 ~~~
@@ -597,7 +598,7 @@ If you are interested in how the machine works "behind the curtains", check out 
 
 
 
-**Personal remarks:** 
+## Personal remarks
 As I'm writing this in September 2020, it's now almost a year since the machine was published on vulnhub where I discovered it. Because of the Binary Exploit Part needed for Flag #5 it was really a challenge and way "above my paygrade" back then. I couldn't solve it for a very long time, but I always wanted to make it and publish a writeup - because I couldn't find one back then. So I kept learning while playing OverTheWire and participating in CTFs. And I kept coming back to SiXeS every once in a while to see if the new Tricks I learned from e.g. OTW Leviathan and Narnia would help. In the end it took realy longer than I could have imagined, but I made it and it was worth it!!
 
 And hey, just as I succeded now with Flag No 5, I noticed that some people in China/Hongkong where half a year faster than me: 
