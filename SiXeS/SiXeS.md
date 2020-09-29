@@ -86,7 +86,7 @@ We start with the assumption that the code behind the vulnerable database query 
 $query = "SELECT <column1>, <column2>, ... , <columnN> FROM <table> WHERE id=$id";
 ~~~
 
-If we're lucky this query can be used to perform a UNION SELECT injection. The basic idea is that we use the $id variable, to which we have full access via the $_GET parameter `"&id=<value>"´ in the URL, to join a different table to the result in a way that it becomes visible in the resulting webpage. In order to make it work, it's crucial that we first determine how many columns exactly have been selected in the code. 
+If we're lucky this query can be used to perform a UNION SELECT injection. The basic idea is that we use the $id variable which is fully under our control via the $_GET parameter `&id=<value>` in the URL, to join a different table to the result in a way that it becomes visible in the resulting webpage. In order to make it work, it's crucial that we first determine how many columns exactly have been selected in the code. 
 
 We can do this by running following querys and appending the list of "null"-values. 
 
@@ -143,26 +143,27 @@ http://10.0.2.5/?page=post.php&id=1 union select null,flag,null from sixes.s3cr3
 
 ![](attachments/Clipboard_07.png)
 
-Digging further into the DB with the same method, we also find a users table with one single entry
+Digging further into the DB with the same method, we also find a table "users" with one single entry:
 
 | username | password | role |
 | --- | --- | --- |
 | webmaster | c78180d394684c07d6d87b291d8fe533 | admin |
 
-These might be the credentials required for logging in to the "Restricted area" of the page. Password is an md5 hash but unfortunately it seems to be too strong to break. And the SQL UNION SELECT attack does not provide us the possibility to INSERT or UPDATE any records in the database. So we are stuck here ... 
+These might be the credentials required for logging in to the "Restricted area" of the page. Password is an md5 hash but unfortunately it seems to be too strong to break. Good indicator (at least for CTF Boxes) is that google does not find any clear text results. 
+And unfortunately the SQL UNION SELECT attack does not provide us the possibility to INSERT or UPDATE any records in the database. So we are stuck here ... 
 
 ## Flag 3: XSS cookie stealing
 Let's again focus on the webpage. We need to find a way to access the restricted area. We know that the username probably is "webmaster", but are stuck on the pw.
 
 ![](attachments/Clipboard_08.png)
 
-So let's have a look at the "Contact" page where we can fill a feedback formular and send it to the webmaster. 
+So let's have a look at the "Contact" page where we can fill a feedback formular and send it to the webmaster? 
 
 ![](attachments/Clipboard_09.png)
 
-Let's imagine: 
-Someone should receive and read what we're sending here?
-Maybe this someone is logged into the restricted area while reading what we send?
+Let's imagine:  
+Someone should receive and read what we're sending here?  
+Maybe this someone is logged into the restricted area while reading what we send?  
 
 Let's see what happens if we are trying to trick him into opening an "malicious" link. 
 
@@ -183,7 +184,7 @@ Ok, that's probably not the most highly sophisticated  "XSS simulator", but anyw
 
 We go back to Firefox, open the Restricted Area page, hit F12 for the Firefox develper tools, click on Storage -> Cookies and exchange our PHPSESSID with the one we received in netcat, 
 
-![](attachments/Clipboard_2020-09-29-08-37-28.png)
+![](attachments/Clipboard_11_1.png)
 
 Then we reload the page with F5 
 
