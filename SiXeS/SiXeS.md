@@ -1,12 +1,12 @@
 # SiXeS
 
 * [Overview](#overview)
-* [Flag 1: Anonymous FTP](#flag_1__anonymous_ftp)
-* [Flag 2: SQL injection](#flag_2-_sql_injection)
-* [Flag 3: XSS cookie stealing](#flag_3-_xss_cookie_stealing)
-* [Flag 4: Initial low privilege system access](#flag_4-_initial_low_privilege_system_access)
-* [Flag 5: Privilege escalation: SUID binary exploitation](#flag_5-_privilege_escallation-_suid_binary_exploitation)
-* [Flag 6: Getting root](#flag_6-_getting_root)
+* [Flag 1: Anonymous FTP](#flag_1_anonymous_ftp)
+* [Flag 2: SQL injection](#flag_2_sql_injection)
+* [Flag 3: XSS cookie stealing](#flag_3_xss_cookie_stealing)
+* [Flag 4: Initial low privilege system access](#flag_4_initial_low_privilege_system_access)
+* [Flag 5: Privilege escalation: SUID binary exploitation](#flag_5_privilege_escallation_suid_binary_exploitation)
+* [Flag 6: Getting root](#flag_6_getting_root)
 * [Personal remarks](#personal remarks)
 
 ## Overview
