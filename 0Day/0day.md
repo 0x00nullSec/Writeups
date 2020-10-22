@@ -1,6 +1,7 @@
 # 0Day - TryHackMe.com
 
 ![](attachments/Image04.png)
+
 [Link to room on TryHackMe.com](https://tryhackme.com/room/0day)
 
 
@@ -69,6 +70,7 @@ by OJ Reeves (@TheColonial) & Christian Mehlmauer (@_FireFart_)
 
 Author laughing at us in robots.txt
 ![](attachments/Image01.png)
+
 Just you wait ... 
 
 /secret shows the turtle ... another stego?
