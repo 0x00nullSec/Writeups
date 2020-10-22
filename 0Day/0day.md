@@ -69,11 +69,13 @@ by OJ Reeves (@TheColonial) & Christian Mehlmauer (@_FireFart_)
 ~~~
 
 Author laughing at us in robots.txt
+
 ![](attachments/Image01.png)
 
 Just you wait ... 
 
 /secret shows the turtle ... another stego?
+
 ![](attachments/Image02.png)
 
 ~~~
@@ -218,6 +220,7 @@ DISTRIB_DESCRIPTION="Ubuntu 14.04.1 LTS"
 ~~~
 
 A quick research reveals that it's probably vulnerable to the following exploit:
+
 [Linux Kernel 3.13.0 < 3.19 (Ubuntu 12.04/14.04/14.10/15.04) - 'overlayfs' Local Privilege Escalation](https://www.exploit-db.com/exploits/37292)
 
 We prepare it:
